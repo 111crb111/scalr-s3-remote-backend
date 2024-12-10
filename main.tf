@@ -7,13 +7,22 @@ variable "bucket_name" {
     description = "The name of the S3 bucket to create"
 }
 
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+}
+
+locals {
+  bucket_name = "${var.bucket_name}-${random_string.bucket_suffix.result}"
+}
+
 provider "aws" {
     region = var.region
 }
 
 # Create the S3 bucket to store the Terraform state file
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.bucket_name
+  bucket = local.bucket_name
   acl    = "private"
 
   versioning {
@@ -50,10 +59,20 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "alfiia-terraform-state-bucket"
+    key            = "global/s3/terraform.tfstate"  # Path in S3 where the state file will be stored
+    region         = "us-west-2"
+    encrypt        = true                           # Enables server-side encryption
+    dynamodb_table = "terraform-locks"      # Name of the DynamoDB table for state locking
+  }
+}
+
 output "remote_config" {
     value = {
         bucket = aws_s3_bucket.terraform_state.bucket
-        key    = "global/${var.bucket_name}/terraform.tfstate"
+        key    = "global/${local.bucket_name}/terraform.tfstate"
         region = var.region
         encrypt = true
         dynamodb_table = aws_dynamodb_table.terraform_locks.name
