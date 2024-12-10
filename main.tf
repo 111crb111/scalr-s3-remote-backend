@@ -49,3 +49,13 @@ resource "aws_dynamodb_table" "terraform_locks" {
     Environment = "dev"
   }
 }
+
+output "remote_config" {
+    value = {
+        bucket = aws_s3_bucket.terraform_state.bucket
+        key    = "global/${var.bucket_name}/terraform.tfstate"
+        region = var.region
+        encrypt = true
+        dynamodb_table = aws_dynamodb_table.terraform_locks.name
+    }
+}
