@@ -31,6 +31,12 @@ resource "aws_s3_bucket" "terraform_state" {
   versioning {
     enabled = true
   }
+
+  tags = {
+    Name           = "TerraformLockTable"
+    Environment    = "dev"
+    test-env-owner = "crb"
+  }
 }
 
 # Create a DynamoDB table for state locking
@@ -57,8 +63,9 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 
   tags = {
-    Name        = "TerraformLockTable"
-    Environment = "dev"
+    Name           = "TerraformLockTable"
+    Environment    = "dev"
+    test-env-owner = "crb"
   }
 }
 
