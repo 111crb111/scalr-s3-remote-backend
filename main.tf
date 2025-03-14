@@ -40,9 +40,9 @@ resource "aws_s3_bucket" "terraform_state" {
     enabled = true
   }
 
-  tags = {
-    test-env-owner = "crb"
-  }
+  #tags = {
+  #  test-env-owner = "crb"
+  #}
 }
 
 # Create a DynamoDB table for state locking
